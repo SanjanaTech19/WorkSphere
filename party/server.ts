@@ -8,9 +8,7 @@ export default class WorkspaceServer implements Party.Server {
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     // Yjs connection for shared state (messages, markers)
     onConnect(conn, this.room, {
-      yjsOptions: {
-        gc: true,
-      },
+      gc: true,
     });
 
     // Also handle simple presence via standard WebSockets
