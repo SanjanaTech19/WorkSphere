@@ -385,45 +385,49 @@ const Map = ({
         )}
 
 
-        {markers
-          .filter((marker) => marker && marker.position && marker.position.lat != null && marker.position.lng != null && !isNaN(Number(marker.position.lat)) && !isNaN(Number(marker.position.lng)))
-          .map((marker) => (
-            <Marker
-              key={marker.id}
-              position={[Number(marker.position.lat), Number(marker.position.lng)]}
-              icon={marker.id.includes("dest") ? destinationIcon : venueIcon}
-            >
-              <Popup>
-                <div className="text-sm">
-                  <div className="font-semibold text-white">{marker.name}</div>
-                  {marker.category && (
-                    <div className="text-zinc-400">{marker.category}</div>
-                  )}
-                  {marker.address && (
-                    <div className="text-zinc-500 text-xs mt-1">{marker.address}</div>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    // Prevent duplicates in queue chain matrix
-                    if (!routingQueue.some(v => v.id === marker.id)) {
-                      const updated = [...routingQueue, {
-                        id: marker.id,
-                        name: marker.name,
-                        latitude: Number(marker.position.lat),
-                        longitude: Number(marker.position.lng)
-                      }];
-                      setRoutingQueue(updated);
-                      calculateOptimizedRoute(updated);
-                    }
-                  }}
-                  className="mt-2 w-full rounded bg-zinc-800 py-1 text-[10px] font-medium text-zinc-200 hover:bg-blue-600 hover:text-white transition-colors"
-                >
-                  ➕ Add to Workday Timeline
-                </button>
-              </Popup>
-            </Marker>
-          ))}
+        {showHeatmap ? (
+          <HeatmapOverlay points={heatmapPoints} visible={showHeatmap} />
+        ) : (
+          markers
+            .filter((marker) => marker && marker.position && marker.position.lat != null && marker.position.lng != null && !isNaN(Number(marker.position.lat)) && !isNaN(Number(marker.position.lng)))
+            .map((marker) => (
+              <Marker
+                key={marker.id}
+                position={[Number(marker.position.lat), Number(marker.position.lng)]}
+                icon={marker.id.includes("dest") ? destinationIcon : venueIcon}
+              >
+                <Popup>
+                  <div className="text-sm">
+                    <div className="font-semibold text-white">{marker.name}</div>
+                    {marker.category && (
+                      <div className="text-zinc-400">{marker.category}</div>
+                    )}
+                    {marker.address && (
+                      <div className="text-zinc-500 text-xs mt-1">{marker.address}</div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      // Prevent duplicates in queue chain matrix
+                      if (!routingQueue.some(v => v.id === marker.id)) {
+                        const updated = [...routingQueue, {
+                          id: marker.id,
+                          name: marker.name,
+                          latitude: Number(marker.position.lat),
+                          longitude: Number(marker.position.lng)
+                        }];
+                        setRoutingQueue(updated);
+                        calculateOptimizedRoute(updated);
+                      }
+                    }}
+                    className="mt-2 w-full rounded bg-zinc-800 py-1 text-[10px] font-medium text-zinc-200 hover:bg-blue-600 hover:text-white transition-colors"
+                  >
+                    ➕ Add to Workday Timeline
+                  </button>
+                </Popup>
+              </Marker>
+            ))
+        )}
 
         {/* Render OSRM Optimized Multi-Stop Routing Layer Geometry */}
         {optimizedRoute && optimizedRoute.coordinates && optimizedRoute.coordinates.length > 1 && (
@@ -448,32 +452,7 @@ const Map = ({
           </Polyline>
         )}
 
-        {showHeatmap ? (
-          <HeatmapOverlay points={heatmapPoints} visible={showHeatmap} />
-        ) : (
-          markers
-            .filter((marker) => marker && marker.position && marker.position.lat != null && marker.position.lng != null && !isNaN(Number(marker.position.lat)) && !isNaN(Number(marker.position.lng)))
-            .map((marker) => (
-              <Marker
-                key={marker.id}
-                position={[Number(marker.position.lat), Number(marker.position.lng)]}
-                icon={marker.id.includes("dest") ? destinationIcon : venueIcon}
-              >
-                <Popup>
-                  <div className="text-sm">
-                    <div className="font-semibold text-white">{marker.name}</div>
-                    {marker.category && (
-                      <div className="text-zinc-400">{marker.category}</div>
-                    )}
-                    {marker.address && (
-                      <div className="text-zinc-500 text-xs mt-1">{marker.address}</div>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))
 
-        )}
 
         {routes.map((route) => {
           const validPositions = (route.path || [])
