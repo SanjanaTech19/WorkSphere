@@ -10,15 +10,15 @@ import {
   Polyline,
   useMap,
 } from "react-leaflet";
-import L from "leaflet";
 
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapMarker, MapRoute, MapView } from "@/types/map";
 
 // Import Leaflet Heatmap Plugin safely only on client-side and not in Jest tests
 if (typeof window !== "undefined" && process.env.NODE_ENV !== "test") {
-  // @ts-expect-error - leaflet.heat lacks formal typescript declarations
-  import("leaflet.heat");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require("leaflet.heat");
 }
 
 // Custom venue marker for dark theme - purple/blue dot

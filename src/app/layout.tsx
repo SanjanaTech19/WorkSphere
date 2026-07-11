@@ -81,6 +81,7 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_ZW5hYmxlZC1jYXQtNDguY2xlcmsuYWNjb3VudHMuZGV2JA"}
       appearance={{
         elements: {
           formButtonPrimary: "bg-blue-600 hover:bg-blue-700",

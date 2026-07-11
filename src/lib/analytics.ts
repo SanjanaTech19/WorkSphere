@@ -235,72 +235,67 @@ export async function getAnalyticsSummaryAsync(): Promise<{
   return getAnalyticsSummary();
 }
 
-export function clearAnalytics(): void {
-  memQueue.length = 0;
-}
-
-// ─── Agent performance metrics (in-memory, sufficient for dev) ────────────────
-
-interface AgentBucket {
-  durations: number[];
-  successes: number;
-  failures: number;
-}
-
-const agentBuckets = new Map<string, AgentBucket>();
-
-export function recordAgentMetric(agent: string, duration: number, success: boolean): void {
-  const b = agentBuckets.get(agent) ?? { durations: [], successes: 0, failures: 0 };
-  b.durations.push(duration);
-  if (b.durations.length > 100) b.durations.shift();
-  if (success) b.successes++; else b.failures++;
-  agentBuckets.set(agent, b);
-}
-
 export function getAgentMetrics(): Array<{
   agent: string;
   avgDuration: number;
   successRate: number;
   totalCalls: number;
 }> {
-  return Array.from(agentBuckets.entries()).map(([agent, b]) => {
-    const totalCalls = b.successes + b.failures;
-    const avgDuration =
-      b.durations.length > 0
-        ? b.durations.reduce((a, c) => a + c, 0) / b.durations.length
-        : 0;
-    return {
-      agent,
-      avgDuration: Math.round(avgDuration),
-      successRate: totalCalls > 0 ? Math.round((b.successes / totalCalls) * 100) : 0,
-      totalCalls,
-    };
-  });
+  const agents: Record<string, { totalDuration: number; successes: number; count: number }> = {};
+  
+  for (const event of memQueue) {
+    if (event.name === "agent_completed" && event.properties) {
+      const agent = String(event.properties.agent);
+      const duration = Number(event.properties.durationMs ?? 0);
+      const success = Boolean(event.properties.success);
+      
+      if (!agents[agent]) {
+        agents[agent] = { totalDuration: 0, successes: 0, count: 0 };
+      }
+      agents[agent].totalDuration += duration;
+      if (success) agents[agent].successes += 1;
+      agents[agent].count += 1;
+    }
+  }
+  
+  return Object.entries(agents).map(([agent, data]) => ({
+    agent,
+    avgDuration: data.count > 0 ? data.totalDuration / data.count : 0,
+    successRate: data.count > 0 ? data.successes / data.count : 0,
+    totalCalls: data.count,
+  }));
 }
 
-// ─── Search pattern tracking ──────────────────────────────────────────────────
-
-interface SearchPattern {
+export function getPopularSearches(limit: number = 10): {
   query: string;
   count: number;
   lastUsed: number;
-}
-
-const searchPatterns = new Map<string, SearchPattern>();
-
-export function recordSearchPattern(query: string): void {
-  const key = query.toLowerCase().trim();
-  const existing = searchPatterns.get(key);
-  if (existing) {
-    existing.count++;
-    existing.lastUsed = Date.now();
-  } else {
-    searchPatterns.set(key, { query: key, count: 1, lastUsed: Date.now() });
+}[] {
+  const searches: Record<string, { count: number; lastUsed: number }> = {};
+  
+  for (const event of memQueue) {
+    if (event.name === "search_performed" && event.properties) {
+      const query = String(event.properties.query ?? "");
+      if (!query) continue;
+      
+      if (!searches[query]) {
+        searches[query] = { count: 0, lastUsed: 0 };
+      }
+      searches[query].count += 1;
+      searches[query].lastUsed = Math.max(searches[query].lastUsed, event.timestamp);
+    }
   }
-}
-
-export function getPopularSearches(limit = 10): SearchPattern[] {
-  return Array.from(searchPatterns.values())
+  
+  return Object.entries(searches)
+    .map(([query, data]) => ({
+      query,
+      count: data.count,
+      lastUsed: data.lastUsed,
+    }))
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
+}
+
+export function clearAnalytics(): void {
+  memQueue.length = 0;
 }

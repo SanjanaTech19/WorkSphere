@@ -28,7 +28,18 @@ export async function POST(
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const { wifiQuality, hasOutlets, noiseLevel, comment, hasErgonomic, outletDensity, wifiSpeed, speedtestPhoto } = validation.data;
+    const {
+      wifiQuality,
+      hasOutlets,
+      noiseLevel,
+      avgDecibels,
+      peakDecibels,
+      comment,
+      hasErgonomic,
+      outletDensity,
+      wifiSpeed,
+      speedtestPhoto,
+    } = validation.data;
     const { venue: venueData } = body; // venue data for creating new venues
 
     const targetPlaceId = venueData?.placeId || venueId;
@@ -65,6 +76,8 @@ export async function POST(
         wifiQuality,
         hasOutlets,
         noiseLevel,
+        avgDecibels: avgDecibels || null,
+        peakDecibels: peakDecibels || null,
         hasErgonomic,
         outletDensity,
         wifiSpeed,
@@ -77,6 +90,8 @@ export async function POST(
         wifiQuality,
         hasOutlets,
         noiseLevel,
+        avgDecibels: avgDecibels || null,
+        peakDecibels: peakDecibels || null,
         hasErgonomic: hasErgonomic || false,
         outletDensity: outletDensity || "none",
         wifiSpeed: wifiSpeed || null,

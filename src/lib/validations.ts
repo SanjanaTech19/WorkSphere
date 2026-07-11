@@ -52,6 +52,8 @@ export const venueRatingSchema = z.object({
   outletDensity: z.enum(["every_table", "some_tables", "wall_seats", "none"]).optional().default("none"),
   wifiSpeed: z.number().min(0).max(10000).optional().nullable(),
   speedtestPhoto: z.string().optional().nullable(),
+  avgDecibels: z.number().min(20).max(130).optional().nullable(),
+  peakDecibels: z.number().min(20).max(140).optional().nullable(),
 });
 
 // Conversation schemas
