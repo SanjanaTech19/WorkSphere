@@ -11,8 +11,15 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default function middleware(request: any, event: any) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
   if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === "pk_test_ZXhhbXBsZS5hY2NvdW50cy5kZXYk") {
-    return NextResponse.next();
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      }
+    });
   }
   return clerkMiddleware(async (auth, req) => {
     if (!isPublicRoute(req)) {
