@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
         crowdsourced: true,
         requiresReview,
         imageUrl,
+        creatorId: userId,
       },
     });
 

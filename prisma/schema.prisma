@@ -20,6 +20,7 @@ model User {
   bookings      Booking[]
   memories      UserMemory[]
   crdtState     Bytes?
+  createdVenues Venue[]        @relation("VenueCreator")
 }
 
 model Venue {
@@ -47,6 +48,8 @@ model Venue {
   ratings        VenueRating[]
   favorites      Favorite[]
   bookings       Booking[]
+  creatorId      String?
+  creator        User?         @relation("VenueCreator", fields: [creatorId], references: [id])
 
   @@index([latitude, longitude])
   @@index([category])
