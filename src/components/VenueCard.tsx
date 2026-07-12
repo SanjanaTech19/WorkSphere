@@ -308,8 +308,8 @@ export function VenueCard({
                 📏 {venue.distance}
               </div>
             )}
-          </div>
         </div>
+      </div>
         
         {/* Amenities */}
         <div className="flex flex-wrap gap-2 mb-4">

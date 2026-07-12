@@ -83,15 +83,18 @@ export function VenueDetailDialog({
         }
     };
 
-    // Effect 1: Fetch photos and reset state on venue change
+    // Effect 1: Venue badalne par state reset karna aur photo fetch karna
     useEffect(() => {
         if (!venue) return;
 
+        // Reset verification weights on venue switch
         setVoteMetrics({
             wifi: { confidenceScore: 100, upvotes: 6, downvotes: 0 },
             outlets: { confidenceScore: 100, upvotes: 6, downvotes: 0 },
         });
     }, [venue]);
+
+
 
     useEffect(() => {
         if (!venue) return;
@@ -379,9 +382,7 @@ export function VenueDetailDialog({
 
                 {/* Content Section */}
 
-
-
-                <div className="p-8 bg-white dark:bg-zinc-900 overflow-y-auto max-h-[calc(90vh-360px)]">
+                <div className="p-8 bg-white dark:bg-zinc-900 overflow-y-auto max-h-[calc(90vh-320px)]">
                     {activeTab === "overview" && (
                         <>
                             <div className="grid grid-cols-3 gap-4 mb-8">
@@ -464,11 +465,9 @@ export function VenueDetailDialog({
                                         {venue.hasErgonomic && " The workspace features verified ergonomic chairs and height-adjustable/standing desks."}
                                     </p>
                                 </div>
+                            </div>
 
-
-
-
-                                <div className="flex flex-col gap-3 pt-4">
+                        <div className="flex flex-col gap-3 pt-4">
                                     <button
                                         onClick={() => onGetDirections(venue)}
                                         className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest py-4 px-8 rounded-2xl transition-all shadow-xl shadow-blue-500/20 active:scale-[0.98]"
@@ -499,7 +498,6 @@ export function VenueDetailDialog({
                                         )}
                                     </div>
                                 </div>
-                            </div>
                         </>
                     )}
 
