@@ -63,6 +63,7 @@ model Venue {
   patioOnly          Boolean             @default(false)
   waterBowlsProvided Boolean             @default(false)
   outletDensity      String? // every_table, some_tables, wall_seats, none
+  powerTypes         String[]            @default([])
   wifiSpeed          Int? // in Mbps
   crowdsourced       Boolean             @default(false)
   requiresReview     Boolean             @default(false)
@@ -73,6 +74,7 @@ model Venue {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   lighting           String?
+  musicStyle         String?
   ratings            VenueRating[]
   favorites          Favorite[]
   bookings           Booking[]
@@ -107,6 +109,7 @@ model VenueRating {
   hasNoMusic        Boolean  @default(false)
   hasQuietZone      Boolean  @default(false)
   outletDensity     String? // every_table, some_tables, wall_seats, none
+  powerTypes        String[] // usb_c, ac_wall, wireless
   wifiSpeed         Int? // in Mbps
   comment           String?
   speedtestPhoto    String?
@@ -114,6 +117,7 @@ model VenueRating {
   avgDecibels       Float?
   peakDecibels      Float?
   lighting          String?
+  musicStyle        String?
 
   @@unique([userId, venueId])
   @@index([venueId])
@@ -168,6 +172,7 @@ model Booking {
   status          BookingStatus @default(CONFIRMED)
   confirmationId  String        @unique
   createdAt       DateTime      @default(now())
+  projectBillingCode String?
   seatId          String?
   seatNumber      String?
   duration        Int?

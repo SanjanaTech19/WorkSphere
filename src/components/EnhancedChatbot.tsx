@@ -80,6 +80,7 @@ interface Filters {
   specialtyEspresso?: boolean;
   oatAlmondMilk?: boolean;
   pourOverAvailable?: boolean;
+  musicStyle?: "all" | "lofi" | "classical_jazz" | "no_music";
 }
 
 interface Conversation {
@@ -109,7 +110,6 @@ export function EnhancedChatbot({ onMapUpdate, onOpenDetails, onBook, userLocati
   const { isSignedIn, user } = useUser();
 
   const { socket, yDoc } = useMultiplayerSession(roomId || null);
-
   const { getToken } = useAuth();
 
 
@@ -192,8 +192,9 @@ export function EnhancedChatbot({ onMapUpdate, onOpenDetails, onBook, userLocati
             onMapUpdate(data.update);
           }
         }
-      } catch (e) {}
-
+      } catch (e) {
+        console.error("Failed to parse WebSocket message:", e);
+      }
     };
 
     socket.addEventListener("message", onMessage);
@@ -477,6 +478,7 @@ export function EnhancedChatbot({ onMapUpdate, onOpenDetails, onBook, userLocati
     hasPhoneBooths?: boolean;
     hasNoMusic?: boolean;
     hasQuietZone?: boolean;
+    musicStyle?: string;
   }) => {
     if (!ratingVenue || !isSignedIn) return;
     try {
