@@ -43,6 +43,8 @@ describe('Notifications and Reminders API', () => {
       expect(response.success).toBe(true);
       expect(response.sessionsProcessed).toBeGreaterThan(0);
     });
+  });
+
   describe('POST /api/bookings/export', () => {
     it('returns 400 when no bookings are selected', async () => {
       const response = { status: 400, error: "No bookings selected" };
