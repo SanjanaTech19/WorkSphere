@@ -33,7 +33,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "WorkSphere - AI-Powered Remote Workspace Finder",
-  description: "Discover cafes, coworking spaces, and libraries with great WiFi, power outlets, and the perfect atmosphere for your work style.",
+  description:
+    "Discover cafes, coworking spaces, and libraries with great WiFi, power outlets, and the perfect atmosphere for your work style.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -73,65 +74,35 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") || "";
   const isAnalyticsPage = pathname.startsWith("/analytics");
 
-  const isDummyKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === "pk_test_ZXhhbXBsZS5hY2NvdW50cy5kZXYk";
+  const isDummyKey =
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ===
+    "pk_test_ZXhhbXBsZS5hY2NvdW50cy5kZXYk";
 
-  const content = (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className="bg-white dark:bg-zinc-950"
-    >
-      <head>
-        <meta name="color-scheme" content="light dark" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (() => {
-                try {
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (prefersDark) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch {}
-              })();
-            `,
-          }}
-        />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="mobile-web-app-capable" content="yes" />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50`}
-      >
-        <I18nProvider>
-          {children}
-        </I18nProvider>
-      </body>
-    </html>
   const innerContent = (
     <ThemeProvider>
-      <I18nProvider>
-        {children}
-      </I18nProvider>
+      <I18nProvider>{children}</I18nProvider>
     </ThemeProvider>
   );
 
-  const bodyContent = (isDummyKey && isAnalyticsPage) ? innerContent : (
-    <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_ZXhhbXBsZS5hY2NvdW50cy5kZXYk"}
-      appearance={{
-        elements: {
-          formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
-          card: "shadow-xl",
-        },
-      }}
-    >
-      {innerContent}
-    </ClerkProvider>
-  );
+  const bodyContent =
+    isDummyKey && isAnalyticsPage ? (
+      innerContent
+    ) : (
+      <ClerkProvider
+        publishableKey={
+          process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+          "pk_test_ZXhhbXBsZS5hY2NvdW50cy5kZXYk"
+        }
+        appearance={{
+          elements: {
+            formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
+            card: "shadow-xl",
+          },
+        }}
+      >
+        {innerContent}
+      </ClerkProvider>
+    );
 
   return (
     <html lang="en" suppressHydrationWarning>
