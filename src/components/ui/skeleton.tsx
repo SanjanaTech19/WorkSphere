@@ -11,7 +11,7 @@ export function Skeleton({ className }: SkeletonProps) {
     <div
       className={cn(
         "animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-800",
-        className
+        className,
       )}
     />
   );
@@ -19,36 +19,45 @@ export function Skeleton({ className }: SkeletonProps) {
 
 export function VenueCardSkeleton() {
   return (
-    <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 bg-white dark:bg-zinc-900">
-      <div className="flex items-start gap-2">
-        {/* Icon placeholder */}
-        <Skeleton className="w-8 h-8 rounded-lg" />
-        
-        <div className="flex-1 min-w-0">
-          {/* Title and score */}
-          <div className="flex items-center gap-2 mb-1">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-12" />
-          </div>
-          
-          {/* Category */}
-          <Skeleton className="h-3 w-20 mb-1" />
-          
-          {/* Address */}
-          <Skeleton className="h-3 w-40 mb-2" />
-          
-          {/* Amenity badges */}
-          <div className="flex items-center gap-2 mb-2">
-            <Skeleton className="h-4 w-14" />
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-4 w-12" />
-          </div>
-          
-          {/* Action buttons */}
-          <div className="flex items-center gap-1 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-            <Skeleton className="h-6 w-20" />
-            <Skeleton className="h-6 w-14" />
-            <Skeleton className="h-6 w-12" />
+    <div className="border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 shadow-lg my-2">
+      {/* Venue photo placeholder */}
+      <Skeleton className="w-full h-44 rounded-none" />
+
+      <div className="p-4">
+        <div className="flex items-start gap-3">
+          {/* Icon placeholder */}
+          <Skeleton className="w-9 h-9 rounded-xl flex-shrink-0" />
+
+          <div className="flex-1 min-w-0">
+            {/* Title and score */}
+            <div className="flex items-center gap-2 mb-1.5">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+
+            {/* Address */}
+            <Skeleton className="h-3 w-48 mb-3" />
+
+            {/* Amenity badges */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <Skeleton className="h-5 w-14 rounded-md" />
+              <Skeleton className="h-5 w-16 rounded-md" />
+              <Skeleton className="h-5 w-12 rounded-md" />
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Skeleton className="h-9 rounded-xl w-full" />
+                <Skeleton className="h-9 rounded-xl w-full" />
+              </div>
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5">
+                <Skeleton className="h-8 rounded-lg flex-1 sm:w-20" />
+                <Skeleton className="h-8 rounded-lg flex-1 sm:w-20" />
+                <Skeleton className="h-8 rounded-lg flex-1 sm:w-20" />
+                <Skeleton className="h-8 rounded-lg flex-1 sm:w-20" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -58,7 +67,7 @@ export function VenueCardSkeleton() {
 
 export function VenueListSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <Skeleton className="h-3 w-24 mb-2" />
       {Array.from({ length: count }).map((_, i) => (
         <VenueCardSkeleton key={i} />
