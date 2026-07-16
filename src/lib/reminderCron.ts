@@ -98,7 +98,7 @@ export async function processUpcomingReservationAlerts() {
             )
           ) {
             console.log(
-              `[Reminder Notification Skip] User ${booking.user?.email || booking.customerId} is outside notification window.`,
+              `[Reminder Notification Skip] User ${booking.user?.email || booking.customerEmail} is outside notification window.`,
             );
             continue;
           }
