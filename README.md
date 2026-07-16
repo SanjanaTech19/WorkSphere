@@ -19,15 +19,203 @@
 
 ---
 
-### 👑 Project Leadership & Authorship
+### 👥 The Executive Board & Rockstars
 
-- **Founder & CTO**: [Satyam Pandey](https://github.com/SatyamPandey-07)
-
-### 🚀 Contributors (Live API Tracker)
-
-Automated contributor tracking synced directly via the GitHub API:
-
-[![WorkSphere Contributors](https://contrib.rocks/image?repo=SatyamPandey-07/WorkSphere)](https://github.com/SatyamPandey-07/WorkSphere/graphs/contributors)
+<table align="center">
+  <tr>
+    <td align="center" width="130">
+      <a href="https://github.com/SatyamPandey-07">
+        <img src="https://github.com/SatyamPandey-07.png?size=80" width="80px;" alt="Satyam Pandey"/><br />
+        <sub><b>Satyam Pandey</b></sub>
+      </a><br />
+      👑 <b>Founder & CTO</b>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/SanjanaRajasekar">
+        <img src="https://github.com/SanjanaRajasekar.png?size=80" width="80px;" alt="Sanjana Rajasekar"/><br />
+        <sub><b>Sanjana R.</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/ayush-pandey-2004">
+        <img src="https://github.com/ayush-pandey-2004.png?size=80" width="80px;" alt="AYUSH PANDEY"/><br />
+        <sub><b>AYUSH PANDEY</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/ErebAsh">
+        <img src="https://github.com/ErebAsh.png?size=80" width="80px;" alt="Himanshu Raj"/><br />
+        <sub><b>Himanshu Raj</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/zainabhina05-png">
+        <img src="https://github.com/zainabhina05-png.png?size=80" width="80px;" alt="Zaeb"/><br />
+        <sub><b>Zaeb</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <a href="https://github.com/chiragdwivediji">
+        <img src="https://github.com/chiragdwivediji.png?size=80" width="80px;" alt="Chirag Dwivedi"/><br />
+        <sub><b>Chirag Dwivedi</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/PrasiddhiMishra">
+        <img src="https://github.com/PrasiddhiMishra.png?size=80" width="80px;" alt="Prasiddhi Mishra"/><br />
+        <sub><b>Prasiddhi M.</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/dikshadabhole78">
+        <img src="https://github.com/dikshadabhole78.png?size=80" width="80px;" alt="Diksha Dabhole"/><br />
+        <sub><b>Diksha Dabhole</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/tanishkmishra510">
+        <img src="https://github.com/tanishkmishra510.png?size=80" width="80px;" alt="Tanishk Mishra"/><br />
+        <sub><b>Tanishk Mishra</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/jidnyasapatil019">
+        <img src="https://github.com/jidnyasapatil019.png?size=80" width="80px;" alt="Jidnyasa Patil"/><br />
+        <sub><b>Jidnyasa Patil</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <a href="https://github.com/pratyushpanda">
+        <img src="https://github.com/pratyushpanda.png?size=80" width="80px;" alt="Pratyush Panda"/><br />
+        <sub><b>Pratyush Panda</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/khushimalani16">
+        <img src="https://github.com/khushimalani16.png?size=80" width="80px;" alt="khushimalani16"/><br />
+        <sub><b>khushimalani16</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/Diwakar-odds">
+        <img src="https://github.com/Diwakar-odds.png?size=80" width="80px;" alt="Diwakar Chaurasia"/><br />
+        <sub><b>Diwakar C.</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/SaiHarshithMoluguri">
+        <img src="https://github.com/SaiHarshithMoluguri.png?size=80" width="80px;" alt="Sai Harshith"/><br />
+        <sub><b>Sai Harshith</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/SanskarWanjari">
+        <img src="https://github.com/SanskarWanjari.png?size=80" width="80px;" alt="Sanskar Wanjari"/><br />
+        <sub><b>Sanskar W.</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <a href="https://github.com/Huzaifaahmedbhutto">
+        <img src="https://github.com/Huzaifaahmedbhutto.png?size=80" width="80px;" alt="Huzaifa"/><br />
+        <sub><b>Huzaifa</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/komal1133">
+        <img src="https://github.com/komal1133.png?size=80" width="80px;" alt="Komal Dhillon"/><br />
+        <sub><b>Komal Dhillon</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/yuvadeekshitha">
+        <img src="https://github.com/yuvadeekshitha.png?size=80" width="80px;" alt="Yuva Deekshitha"/><br />
+        <sub><b>Yuva D.</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/itsaditi05">
+        <img src="https://github.com/itsaditi05.png?size=80" width="80px;" alt="itsaditi05"/><br />
+        <sub><b>itsaditi05</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/anshikaguleria">
+        <img src="https://github.com/anshikaguleria.png?size=80" width="80px;" alt="Anshika Guleria"/><br />
+        <sub><b>Anshika G.</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <a href="https://github.com/daksh-agrawal">
+        <img src="https://github.com/daksh-agrawal.png?size=80" width="80px;" alt="Daksh Agrawal"/><br />
+        <sub><b>Daksh Agrawal</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/ritikasen">
+        <img src="https://github.com/ritikasen.png?size=80" width="80px;" alt="Ritika Sen"/><br />
+        <sub><b>Ritika Sen</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/AnushkaNikam">
+        <img src="https://github.com/AnushkaNikam.png?size=80" width="80px;" alt="Anushka Nikam"/><br />
+        <sub><b>Anushka Nikam</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/buggaprathibha">
+        <img src="https://github.com/buggaprathibha.png?size=80" width="80px;" alt="Bugga Prathibha"/><br />
+        <sub><b>B. Prathibha</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/piushgogi">
+        <img src="https://github.com/piushgogi.png?size=80" width="80px;" alt="Piush Gogi"/><br />
+        <sub><b>Piush Gogi</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <a href="https://github.com/Ruchira807">
+        <img src="https://github.com/Ruchira807.png?size=80" width="80px;" alt="Ruchira Nayak"/><br />
+        <sub><b>Ruchira Nayak</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/vachhanitapan">
+        <img src="https://github.com/vachhanitapan.png?size=80" width="80px;" alt="Vachhani Tapan"/><br />
+        <sub><b>Vachhani Tapan</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/karrisanthoshigayatri">
+        <img src="https://github.com/karrisanthoshigayatri.png?size=80" width="80px;" alt="karrisanthoshigayatri"/><br />
+        <sub><b>karrisanthoshi</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/nishantpurohit04">
+        <img src="https://github.com/nishantpurohit04.png?size=80" width="80px;" alt="Nishant Purohit"/><br />
+        <sub><b>Nishant P.</b></sub>
+      </a>
+    </td>
+    <td align="center" width="130">
+      <a href="https://github.com/SatyamPandey-07/WorkSphere/blob/main/CONTRIBUTING.md">
+        <img src="https://img.icons8.com/clouds/100/plus.png" width="80px;" alt="Join Us!"/><br />
+        <sub><b>Join Us!</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
 ---
 
