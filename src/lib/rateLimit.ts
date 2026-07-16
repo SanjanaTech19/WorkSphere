@@ -5,7 +5,16 @@
  * Development: Falls back to an in-memory sliding window automatically
  */
 
+// ─── Upstash (production) ────────────────────────────────────────────────────
 const upstashLimiters = new Map<number, any>();
+
+interface RateLimitInfo {
+  count: number;
+  remaining: number;
+  resetTime: number;
+  isLimited: boolean;
+}
+const rateLimitInfoStore = new Map<string, RateLimitInfo>();
 
 function getUpstashRatelimit(limitPerMinute: number) {
   if (
@@ -113,8 +122,22 @@ export async function rateLimit(
   }
 
   if (rl) {
-    const { success } = await rl.limit(identifier);
+    const { success, remaining, reset } = await rl.limit(identifier);
+    rateLimitInfoStore.set(identifier, {
+      count: limit - remaining,
+      remaining,
+      resetTime: reset,
+      isLimited: !success,
+    });
     return success;
+  }
+
+  // Periodic cleanup of the Upstash info store to avoid unbound memory growth
+  if (rateLimitInfoStore.size > 10_000) {
+    const now = Date.now();
+    for (const [k, v] of rateLimitInfoStore) {
+      if (now > v.resetTime) rateLimitInfoStore.delete(k);
+    }
   }
 
   return memRateLimit(identifier, limit);
@@ -133,6 +156,10 @@ export function getRateLimitInfo(
   resetTime: number;
   isLimited: boolean;
 } | null {
+  const cached = rateLimitInfoStore.get(identifier);
+  if (cached) {
+    return cached;
+  }
   return memGetInfo(identifier, limit);
 }
 
@@ -140,7 +167,9 @@ export function getRateLimitInfo(
 export function resetRateLimit(identifier?: string): void {
   if (identifier) {
     memStore.delete(identifier);
+    rateLimitInfoStore.delete(identifier);
   } else {
     memStore.clear();
+    rateLimitInfoStore.clear();
   }
 }
