@@ -76,6 +76,11 @@ export function VenueDetailDialog({
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(true);
   const [liveScore, setLiveScore] = useState<number | null>(null);
+  const [imageError, setImageError] = useState(false);
+  const [previewImageError, setPreviewImageError] = useState(false);
+  const [brokenMenuPhotos, setBrokenMenuPhotos] = useState<
+    Record<number, boolean>
+  >({});
   const { t } = useTranslation();
   const [translatingReviewId, setTranslatingReviewId] = useState<string | null>(
     null,
@@ -173,6 +178,9 @@ export function VenueDetailDialog({
   const [menuPhotos, setMenuPhotos] = useState<string[]>([]);
   const [uploadingMenu, setUploadingMenu] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  useEffect(() => {
+    setPreviewImageError(false);
+  }, [previewPhoto]);
   const [wifiPredictions, setWifiPredictions] = useState<any[]>([]);
   const [occupancyData, setOccupancyData] = useState<any[]>([]);
 
@@ -478,6 +486,8 @@ export function VenueDetailDialog({
     if (!venue) return;
     setLiveScore(venue.score ?? null);
     setPhotoLoading(true);
+    setImageError(false);
+    setBrokenMenuPhotos({});
     setActiveTab("overview");
     setActiveDistribution(null);
     const params = new URLSearchParams({
@@ -711,7 +721,7 @@ export function VenueDetailDialog({
   };
 
   const displayPhoto =
-    photoUrl ||
+    (!imageError && photoUrl) ||
     venueFallbacks[venue.category || "default"] ||
     venueFallbacks.default;
   const currentScore = liveScore !== null ? liveScore : venue.score;
@@ -785,6 +795,7 @@ export function VenueDetailDialog({
               src={displayPhoto}
               alt={venue.name}
               className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
@@ -1640,9 +1651,17 @@ export function VenueDetailDialog({
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={photo}
+                        src={
+                          brokenMenuPhotos[i] ? venueFallbacks.default : photo
+                        }
                         alt={`Menu ${i + 1}`}
                         className="w-full h-full object-cover transition-transform group-hover/item:scale-105 duration-300"
+                        onError={() =>
+                          setBrokenMenuPhotos((prev) => ({
+                            ...prev,
+                            [i]: true,
+                          }))
+                        }
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center">
                         <Eye className="w-6 h-6 text-white" />
@@ -1757,12 +1776,25 @@ export function VenueDetailDialog({
               )}
             </div>
 
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={previewPhoto}
-              alt="Speedtest/Menu Preview"
-              className="max-w-full max-h-[90vh] object-contain"
-            />
+            {previewImageError ? (
+              <div className="flex flex-col items-center justify-center p-12 bg-zinc-900 text-center min-h-[300px] min-w-[300px] rounded-xl text-zinc-400">
+                <AlertTriangle className="w-12 h-12 text-amber-500 mb-3 animate-pulse" />
+                <p className="text-sm font-bold uppercase tracking-wider">
+                  Preview Image Not Found
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">
+                  This image may have expired or is unavailable.
+                </p>
+              </div>
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={previewPhoto}
+                alt="Speedtest/Menu Preview"
+                className="max-w-full max-h-[90vh] object-contain"
+                onError={() => setPreviewImageError(true)}
+              />
+            )}
           </div>
         </div>
       )}
