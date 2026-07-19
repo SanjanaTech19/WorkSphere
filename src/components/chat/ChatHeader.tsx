@@ -305,7 +305,7 @@ export function ChatHeader({
                 PROFILE
               </div>
             </div>
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           </div>
         </div>
       </div>
