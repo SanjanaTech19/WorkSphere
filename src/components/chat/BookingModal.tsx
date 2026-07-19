@@ -20,7 +20,8 @@ import {
   CalendarPlus,
   Mail,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import confetti from "canvas-confetti";
 import { Venue } from "./ChatMessages";
 import { trackEvent } from "@/lib/analytics";
 
@@ -57,6 +58,13 @@ export function BookingModal({
   const [step, setStep] = useState<
     "details" | "payment" | "processing" | "success" | "history"
   >("details");
+  const getTodayString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
   const [email, setEmail] = useState("");
@@ -66,6 +74,32 @@ export function BookingModal({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
   const [dateFilter, setDateFilter] = useState("all");
+
+  const filteredHistory = history.filter((booking) => {
+    if (dateFilter === "all") return true;
+    const bDate = new Date(booking.date);
+    const now = new Date();
+
+    if (dateFilter === "current_month") {
+      return (
+        bDate.getMonth() === now.getMonth() &&
+        bDate.getFullYear() === now.getFullYear()
+      );
+    }
+    if (dateFilter === "last_month") {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      return (
+        bDate.getMonth() === lastMonth.getMonth() &&
+        bDate.getFullYear() === lastMonth.getFullYear()
+      );
+    }
+    if (dateFilter.startsWith("q")) {
+      const q = parseInt(dateFilter.charAt(1));
+      const currentQ = Math.floor(bDate.getMonth() / 3) + 1;
+      return q === currentQ && bDate.getFullYear() === now.getFullYear();
+    }
+    return true;
+  });
   const [guests, setGuests] = useState<GuestEntry[]>([]);
   const [guestInviteStatus, setGuestInviteStatus] = useState<
     "idle" | "sending" | "done"
@@ -77,67 +111,55 @@ export function BookingModal({
   const [includeNotes, setIncludeNotes] = useState(false);
   const [showLogo, setShowLogo] = useState(true);
 
-  const getFilteredHistory = () => {
-    if (dateFilter === "all") return history;
-    const now = new Date();
-    const currentYear = now.getFullYear();
+  const modalRef = useRef<HTMLDivElement>(null);
 
-    return history.filter((b) => {
-      const bDate = new Date(b.date);
-      if (isNaN(bDate.getTime())) return true;
-
-      const bMonth = bDate.getMonth();
-      const bYear = bDate.getFullYear();
-
-      switch (dateFilter) {
-        case "current_month":
-          return bMonth === now.getMonth() && bYear === currentYear;
-        case "last_month": {
-          const lastMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-          const lastMonthYear =
-            now.getMonth() === 0 ? currentYear - 1 : currentYear;
-          return bMonth === lastMonth && bYear === lastMonthYear;
-        }
-        case "q1":
-          return bMonth >= 0 && bMonth <= 2 && bYear === currentYear;
-        case "q2":
-          return bMonth >= 3 && bMonth <= 5 && bYear === currentYear;
-        case "q3":
-          return bMonth >= 6 && bMonth <= 8 && bYear === currentYear;
-        case "q4":
-          return bMonth >= 9 && bMonth <= 11 && bYear === currentYear;
-        default:
-          return true;
-      }
-    });
-  };
-
-  const filteredHistory = getFilteredHistory();
-
-  const fetchHistory = async () => {
-    setLoadingHistory(true);
-    try {
-      const res = await fetch("/api/bookings/history");
-      const data = await res.json();
-      setHistory(data.bookings || []);
-      setSelectedIds(new Set());
-      setStep("history");
-    } catch (err) {
-      console.error("Failed to fetch history:", err);
-    } finally {
-      setLoadingHistory(false);
-    }
-  };
-
+  // =========================================================================
+  // CELEBRATORY CONFETTI SUCCESS TRIGGER OVERLAY
+  // =========================================================================
   useEffect(() => {
-    if (!isOpen) {
-      setStep(mode === "history" ? "history" : "details");
-      setGuests([]);
-      setGuestInviteStatus("idle");
-    } else if (mode === "history") {
-      fetchHistory();
+    let animationFrameId: number;
+
+    if (step === "success") {
+      const respectsReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      if (respectsReducedMotion) return;
+
+      const duration = 3 * 1000;
+      const end = Date.now() + duration;
+
+      const frame = () => {
+        confetti({
+          particleCount: 2,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.8 },
+          zIndex: 25000,
+        });
+        confetti({
+          particleCount: 2,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.8 },
+          zIndex: 25000,
+        });
+
+        if (Date.now() < end) {
+          animationFrameId = requestAnimationFrame(frame);
+        }
+      };
+
+      frame();
     }
-  }, [isOpen, mode]);
+
+    // Cleanup function to cancel the animation loop when unmounting or leaving success step
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [step]);
 
   const toggleSelected = (id: string) => {
     setSelectedIds((prev) => {
@@ -147,6 +169,23 @@ export function BookingModal({
       return next;
     });
   };
+
+  useEffect(() => {
+    if (isOpen && mode === "history") {
+      setStep("history");
+      const fetchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+          const res = await fetch("/api/bookings/history");
+          if (res.ok) setHistory(await res.json());
+        } catch (e) {
+          console.error(e);
+        }
+        setLoadingHistory(false);
+      };
+      fetchHistory();
+    }
+  }, [isOpen, mode]);
 
   const toggleSelectAll = () => {
     setSelectedIds((prev) =>
@@ -206,6 +245,11 @@ export function BookingModal({
   if (!isOpen) return null;
 
   const handleBooking = async () => {
+    const todayStr = getTodayString();
+    if (bookingDate && bookingDate < todayStr) {
+      alert("Cannot book a date in the past.");
+      return;
+    }
     setStep("processing");
     trackEvent("venue_rated", {
       venueId: venue?.id || "unknown",
@@ -244,7 +288,6 @@ export function BookingModal({
         action: "booking_confirmed",
       });
 
-      // Send guest invitations if any were added
       if (guests.length > 0 && responseData.bookingId) {
         setGuestInviteStatus("sending");
         try {
@@ -274,6 +317,9 @@ export function BookingModal({
   return (
     <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4 bg-zinc-950/90 animate-in fade-in duration-300 backdrop-blur-sm">
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
         className="bg-white dark:bg-zinc-900 w-full max-w-2xl overflow-hidden rounded-[2.5rem] shadow-[0_20px_100px_rgba(0,0,0,0.9)] border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
@@ -292,6 +338,7 @@ export function BookingModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl transition-all active:scale-90"
           >
             <X className="w-6 h-6" />
@@ -553,6 +600,7 @@ export function BookingModal({
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                     <input
                       type="date"
+                      min={getTodayString()}
                       className="w-full pl-12 pr-6 py-4 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-[1.25rem] text-sm font-bold focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                       value={bookingDate}
                       onChange={(e) => setBookingDate(e.target.value)}
@@ -574,7 +622,6 @@ export function BookingModal({
                   </div>
                 </div>
               </div>
-
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-2">
@@ -631,7 +678,6 @@ export function BookingModal({
 
           {step === "payment" && (
             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-              {/* Visual Card Representation */}
               <div className="p-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-150 transition-transform duration-1000">
                   <Lock className="w-48 h-48" />

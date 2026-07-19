@@ -45,6 +45,8 @@ import Link from "next/link";
 import { MemoryManager } from "./MemoryManager";
 import { NotificationSettings } from "./NotificationSettings";
 import { CheckInHistory } from "./CheckInHistory";
+import { TelegramStatusBanner } from "@/components/dashboard/TelegramStatusBanner";
+import { WorkStyleProfile } from "./WorkStyleProfile";
 
 interface AgentMetric {
   agent: string;
@@ -159,6 +161,13 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Telegram Status Banner */}
+        {isSignedIn && (
+          <div className="mb-8">
+            <TelegramStatusBanner />
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -370,7 +379,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Settings & AI Memory Management */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <WorkStyleProfile />
           <NotificationSettings />
           <MemoryManager />
         </div>

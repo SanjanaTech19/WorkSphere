@@ -27,7 +27,7 @@
 
 Automated contributor tracking synced directly via the GitHub API:
 
-[![WorkSphere Contributors](https://contrib.rocks/image?repo=SatyamPandey-07/WorkSphere)](https://github.com/SatyamPandey-07/WorkSphere/graphs/contributors)
+[![WorkSphere Contributors](https://contrib.rocks/image?repo=SatyamPandey-07/WorkSphere&max=100)](https://github.com/SatyamPandey-07/WorkSphere/graphs/contributors)
 
 ---
 
