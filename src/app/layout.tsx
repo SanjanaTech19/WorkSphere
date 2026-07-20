@@ -92,15 +92,14 @@ export default async function RootLayout({
     "pk_test_ZXhhbXBsZS5hY2NvdW50cy5kZXYk";
 
   const cookieStore = await cookies();
-  const theme = (cookieStore.get("worksphere-theme")?.value as "light" | "dark") || "light";
+  const theme =
+    (cookieStore.get("worksphere-theme")?.value as "light" | "dark") || "light";
 
   const innerContent = (
-    <ThemeProvider>
+    <ThemeProvider initialTheme={theme}>
       <SoundProvider>
         <I18nProvider>{children}</I18nProvider>
       </SoundProvider>
-    <ThemeProvider initialTheme={theme}>
-      <I18nProvider>{children}</I18nProvider>
     </ThemeProvider>
   );
 
@@ -126,7 +125,11 @@ export default async function RootLayout({
     );
 
   return (
-    <html lang="en" className={theme === "dark" ? "dark" : ""} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={theme === "dark" ? "dark" : ""}
+      suppressHydrationWarning
+    >
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

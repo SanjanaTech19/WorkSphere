@@ -18,6 +18,7 @@ import {
   Wifi,
   Zap as Outlets,
   Volume2,
+  VolumeX,
   BarChart3,
   Inbox,
   Share2,
@@ -28,7 +29,6 @@ import {
 import { UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import Link from "next/link";
-import { Volume2, VolumeX } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { useSound } from "../SoundProvider";
 import { EmptyState } from "../ui/EmptyState";
@@ -320,7 +320,10 @@ export function ChatHeader({
                 PROFILE
               </div>
             </div>
-            <UserButton userProfileMode="navigation" userProfileUrl="/user-profile" />
+            <UserButton
+              userProfileMode="navigation"
+              userProfileUrl="/user-profile"
+            />
           </div>
         </div>
       </div>
