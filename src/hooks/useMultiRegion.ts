@@ -34,7 +34,8 @@ export function useMultiRegion({ roomName, token }: UseMultiRegionOptions) {
 
   const socket = usePartySocket({
     host: process.env.NEXT_PUBLIC_PARTYKIT_HOST ?? "127.0.0.1:1999",
-    room: roomName,
+    room: roomName || "multi-region-room",
+    startClosed: !roomName,
     query: token ? { token } : undefined,
     onOpen() {
       setIsConnected(true);

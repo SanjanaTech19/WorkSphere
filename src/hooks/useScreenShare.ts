@@ -212,7 +212,8 @@ export function useScreenShare({ roomId, userId, isHost }: Options) {
 
   const socket = usePartySocket({
     host: partyHost(),
-    room: roomId,
+    room: roomId || "screen-share-room",
+    startClosed: !roomId,
     query: token ? { token } : undefined,
     onOpen() {
       // Late joiners: poke the host in case a share is already running.
