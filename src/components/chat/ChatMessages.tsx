@@ -19,6 +19,7 @@ import {
   Send,
   Star,
   Volume2,
+  VolumeX,
   Wifi,
   Zap,
   LayoutGrid,
@@ -31,6 +32,7 @@ import {
 import { RefObject, useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { BrainTerminal } from "./BrainTerminal";
 import { trackVenueInteraction } from "@/lib/analytics";
 import { MessageRenderer } from "./GenerativeUI";
@@ -831,6 +833,14 @@ export function MessageList({
 }: MessageListProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const {
+    isSupported: isTtsSupported,
+    speakingMessageId,
+    speakingSentenceIndex,
+    speakMessage,
+    stopSpeech,
+  } = useSpeechSynthesis();
+
   const scrollToBottomIfNeeded = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -905,14 +915,34 @@ export function MessageList({
                 }`}
               >
                 {message.role === "assistant" && (
-                  <CopyMessageButton text={message.content} />
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    <ReadAloudButton
+                      isSpeaking={speakingMessageId === message.id}
+                      disabled={!isTtsSupported}
+                      onToggle={() => {
+                        if (speakingMessageId === message.id) {
+                          stopSpeech();
+                        } else {
+                          speakMessage(message.id, message.content);
+                        }
+                      }}
+                    />
+                    <CopyMessageButton text={message.content} />
+                  </div>
                 )}
                 <div
-                  className={`text-sm font-medium leading-relaxed ${message.role === "assistant" ? "pr-6" : ""}`}
+                  className={`text-sm font-medium leading-relaxed ${message.role === "assistant" ? "pr-12" : ""}`}
                 >
                   {message.role === "assistant" ? (
                     <div className="relative">
-                      <MessageRenderer content={message.content} />
+                      <MessageRenderer
+                        content={message.content}
+                        speakingSentenceIndex={
+                          speakingMessageId === message.id
+                            ? speakingSentenceIndex
+                            : null
+                        }
+                      />
                       {message.isStreaming && (
                         <span className="inline-flex gap-0.5 items-center ml-1 accent-text dark:text-[color-mix(in_srgb,var(--primary-accent),transparent_0.2)] font-black animate-pulse">
                           <span>.</span>
@@ -1046,6 +1076,36 @@ function TerminalIcon(props: any) {
   return <span {...props}>💻</span>;
 }
 
+function ReadAloudButton({
+  isSpeaking,
+  onToggle,
+  disabled,
+}: {
+  isSpeaking: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      disabled={disabled}
+      className={`p-1.5 rounded-md transition-all ${
+        isSpeaking
+          ? "text-amber-500 bg-amber-500/10 hover:bg-amber-500/20 ring-1 ring-amber-500/30 shadow-sm opacity-100"
+          : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+      }`}
+      title={isSpeaking ? "Stop reading aloud" : "Read aloud"}
+      aria-label={isSpeaking ? "Stop reading aloud" : "Read aloud"}
+    >
+      {isSpeaking ? (
+        <VolumeX className="w-3.5 h-3.5 animate-pulse text-amber-500" />
+      ) : (
+        <Volume2 className="w-3.5 h-3.5" />
+      )}
+    </button>
+  );
+}
+
 function CopyMessageButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -1058,7 +1118,7 @@ function CopyMessageButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-2 right-2 p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all opacity-0 group-hover:opacity-100"
+      className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all opacity-0 group-hover:opacity-100 focus-within:opacity-100"
       title="Copy message"
       aria-label="Copy message"
     >
