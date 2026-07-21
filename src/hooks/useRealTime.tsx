@@ -282,9 +282,8 @@ export function useMultiplayerSession(roomId: string | null) {
 
   // Use standard websocket for simple presence broadcast
   const socket = usePartySocket({
-    host: process.env.NEXT_PUBLIC_PARTYKIT_HOST || "127.0.0.1:1999",
-    room: isMounted && roomId ? roomId : "default-room",
-    startClosed: !isMounted || !roomId,
+    host: "127.0.0.1:1999",
+    room: isMounted ? roomId || "default" : undefined,
     query: token ? { token } : undefined,
     onMessage() {
       // handled in component

@@ -147,9 +147,7 @@ describe("Redis sliding window path", () => {
     ]);
 
     expect(evalMock).toHaveBeenCalledTimes(3);
-    const nonces = evalMock.mock.calls.map(
-      (call) => (call[1] as string[])[2],
-    );
+    const nonces = evalMock.mock.calls.map((call) => (call[1] as string[])[2]);
     expect(new Set(nonces).size).toBe(3);
   });
 });

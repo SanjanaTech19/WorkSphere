@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Volume2 } from "lucide-react";
-import { processAudioFrame, resetNoiseProcessor } from "@/lib/wasm/noiseProcessor";
+import {
+  processAudioFrame,
+  resetNoiseProcessor,
+} from "@/lib/wasm/noiseProcessor";
 
 export type NoiseMeasurement = {
   averageDb: number;
