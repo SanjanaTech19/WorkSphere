@@ -177,6 +177,7 @@ export class CrowdSimulationEngine {
   private heatmapUniformBuffer: GPUBuffer | null = null;
   private heatmapPipeline: GPURenderPipeline | null = null;
   private heatmapBindGroup: GPUBindGroup | null = null;
+  private densityBindGroup: GPUBindGroup | null = null;
   private heatmapTexture: GPUTexture | null = null;
   private maxDensity = 1;
   private readonly DENSITY_GRID_SIZE = 64;
@@ -412,13 +413,21 @@ export class CrowdSimulationEngine {
       size: AGENT_VERTICES.byteLength,
       usage: BufferUsage.VERTEX | BufferUsage.COPY_DST,
     });
-    this.device.queue.writeBuffer(this.agentVertexBuffer!, 0, AGENT_VERTICES as unknown as BufferSource);
+    this.device.queue.writeBuffer(
+      this.agentVertexBuffer!,
+      0,
+      AGENT_VERTICES as unknown as BufferSource,
+    );
 
     this.agentIndexBuffer = this.device.createBuffer({
       size: AGENT_INDICES.byteLength,
       usage: BufferUsage.INDEX | BufferUsage.COPY_DST,
     });
-    this.device.queue.writeBuffer(this.agentIndexBuffer!, 0, AGENT_INDICES as unknown as BufferSource);
+    this.device.queue.writeBuffer(
+      this.agentIndexBuffer!,
+      0,
+      AGENT_INDICES as unknown as BufferSource,
+    );
 
     // ── Density heatmap buffers ──
     const gridCells = this.DENSITY_GRID_SIZE * this.DENSITY_GRID_SIZE;
@@ -441,7 +450,12 @@ export class CrowdSimulationEngine {
     const texUsage =
       typeof GPUTextureUsage !== "undefined"
         ? GPUTextureUsage
-        : { TEXTURE_BINDING: 0x0004, COPY_DST: 0x0002, COPY_SRC: 0x0001, RENDER_ATTACHMENT: 0x0010 };
+        : {
+            TEXTURE_BINDING: 0x0004,
+            COPY_DST: 0x0002,
+            COPY_SRC: 0x0001,
+            RENDER_ATTACHMENT: 0x0010,
+          };
 
     this.densityTexture = this.device.createTexture({
       size: [this.DENSITY_GRID_SIZE, this.DENSITY_GRID_SIZE],
@@ -451,7 +465,7 @@ export class CrowdSimulationEngine {
 
     this.heatmapTexture = this.device.createTexture({
       size: [this.canvas.width, this.canvas.height],
-      format: navigator.gpu.getPreferredCanvasFormat(),
+      format: navigator.gpu?.getPreferredCanvasFormat() || "rgba8unorm",
       usage: texUsage.RENDER_ATTACHMENT | texUsage.TEXTURE_BINDING,
     });
 
@@ -707,7 +721,7 @@ export class CrowdSimulationEngine {
         entryPoint: "fs_heatmap",
         targets: [
           {
-            format: navigator.gpu.getPreferredCanvasFormat(),
+            format: navigator.gpu?.getPreferredCanvasFormat() || "rgba8unorm",
             blend: {
               color: {
                 srcFactor: "src-alpha",
@@ -728,8 +742,7 @@ export class CrowdSimulationEngine {
       },
     });
 
-    const heatmapBindGroupLayout =
-      this.heatmapPipeline.getBindGroupLayout(0);
+    const heatmapBindGroupLayout = this.heatmapPipeline!.getBindGroupLayout(0);
 
     this.heatmapBindGroup = this.device.createBindGroup({
       layout: heatmapBindGroupLayout,
@@ -908,7 +921,8 @@ export class CrowdSimulationEngine {
       }
 
       // ── Compute Pass: Density accumulation ──
-      const densityPipeline = (this as unknown as { _densityPipeline: unknown })._densityPipeline;
+      const densityPipeline = (this as unknown as { _densityPipeline: unknown })
+        ._densityPipeline;
       if (densityPipeline && this.densityBindGroup) {
         const densityPass = commandEncoder.beginComputePass();
         densityPass.setPipeline(densityPipeline as GPUComputePipeline);
@@ -1032,10 +1046,13 @@ export class CrowdSimulationEngine {
 
       // Cleanup
       depthTexture.destroy();
-      const stagingBuffer = (this as unknown as { _stagingBuffer: GPUBuffer })._stagingBuffer;
+      const stagingBuffer = (this as unknown as { _stagingBuffer: GPUBuffer })
+        ._stagingBuffer;
       if (stagingBuffer) {
         stagingBuffer.destroy();
-        (this as unknown as { _stagingBuffer: GPUBuffer | undefined })._stagingBuffer = undefined;
+        (
+          this as unknown as { _stagingBuffer: GPUBuffer | undefined }
+        )._stagingBuffer = undefined;
       }
 
       // Swap ping-pong buffers
@@ -1052,7 +1069,12 @@ export class CrowdSimulationEngine {
   }
 
   private updateDensityUniforms(): void {
-    if (!this.device || !this.densityUniformBuffer || !this.heatmapUniformBuffer) return;
+    if (
+      !this.device ||
+      !this.densityUniformBuffer ||
+      !this.heatmapUniformBuffer
+    )
+      return;
 
     const p = this.config;
     this.device.queue.writeBuffer(
@@ -1088,7 +1110,8 @@ export class CrowdSimulationEngine {
   private updateDensityBindGroup(): void {
     if (!this.device || !this.densityBindGroup) return;
 
-    const densityPipeline = (this as unknown as { _densityPipeline: unknown })._densityPipeline;
+    const densityPipeline = (this as unknown as { _densityPipeline: unknown })
+      ._densityPipeline;
     if (!densityPipeline) return;
 
     const densityBindGroupLayout = (

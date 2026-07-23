@@ -6,6 +6,12 @@ import { useGodRaysRenderer } from "@/hooks/useGodRaysRenderer";
 import { calculateSunPosition } from "@/lib/sunPosition";
 
 const GODRAYS_STORAGE_KEY = "worksphere:godrays:enabled";
+const MAX_DENSITY = 10;
+
+const safeDensityPercent = (d: number, max: number) => {
+  if (max <= 0) return 0;
+  return Math.round((Math.max(0, Math.min(max, d)) / max) * 100);
+};
 
 export interface VenueGodRaysProps {
   lat?: number | null;
@@ -24,6 +30,11 @@ export function VenueGodRays({
 }: VenueGodRaysProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
+  const [density, setDensity] = useState<number>(4.0);
+
+  const handleDensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDensity(parseFloat(e.target.value) || 0);
+  };
 
   useEffect(() => {
     try {
@@ -130,7 +141,11 @@ export function VenueGodRays({
                   ? "bg-amber-500/20 border-amber-500/30 text-amber-200 hover:bg-amber-500/30"
                   : "bg-zinc-500/20 border-zinc-500/30 text-zinc-400 hover:bg-zinc-500/30"
               }`}
-              title={isEnabled ? "Disable volumetric rendering" : "Enable volumetric rendering"}
+              title={
+                isEnabled
+                  ? "Disable volumetric rendering"
+                  : "Enable volumetric rendering"
+              }
             >
               {isEnabled ? (
                 <Eye className="w-3 h-3" />

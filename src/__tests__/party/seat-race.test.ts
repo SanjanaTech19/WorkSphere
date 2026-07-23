@@ -1,6 +1,4 @@
-import { Party } from "partykit/server";
-
-interface MockConnection extends Party.Connection {
+interface MockConnection {
   id: string;
   state: Record<string, unknown>;
   messages: string[];
@@ -13,12 +11,12 @@ interface MockConnection extends Party.Connection {
   close(): void;
 }
 
-interface MockRoom extends Party.Room {
+interface MockRoom {
   connections: Map<string, MockConnection>;
   broadcast(data: string, exclude?: string[]): void;
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext): void;
-  onMessage(message: string, sender: Party.Connection): void;
-  onClose(conn: Party.Connection): void;
+  onConnect(conn: any, ctx: any): void;
+  onMessage(message: string, sender: any): void;
+  onClose(conn: any): void;
 }
 
 function createMockConnection(id: string): MockConnection {
