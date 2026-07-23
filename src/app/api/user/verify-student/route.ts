@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
-// @ts-expect-error - snarkjs types are missing
-import * as snarkjs from "snarkjs";
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const snarkjs = require("snarkjs");
 
 export async function POST(req: Request) {
   try {

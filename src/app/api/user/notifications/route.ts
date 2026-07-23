@@ -16,7 +16,7 @@ export async function GET() {
     });
 
     const unreadCount = await prisma.pushNotificationLog.count({
-      where: { userId, read: false },
+      where: { userId, status: { not: "READ" } },
     });
 
     return NextResponse.json({
@@ -43,8 +43,8 @@ export async function POST(req: Request) {
     
     if (body.action === "markAsRead") {
       await prisma.pushNotificationLog.updateMany({
-        where: { userId, read: false },
-        data: { read: true },
+        where: { userId, status: { not: "READ" } },
+        data: { status: "READ" },
       });
       return NextResponse.json({ success: true });
     }
