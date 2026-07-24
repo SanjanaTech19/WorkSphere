@@ -80,6 +80,17 @@ export function CustomAvatarUpload() {
       if (currentSource) {
         URL.revokeObjectURL(currentSource);
       }
+      return null;
+    });
+    setSelectedFileName("");
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    let file = e.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setSuccess(null);
 
       return null;
     });
@@ -248,12 +259,13 @@ export function CustomAvatarUpload() {
                   {success}
                 </p>
               )}
-            </div>
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <AvatarCropModal
+    <AvatarCropModal
         imageSource={cropSource ?? ""}
         originalFileName={selectedFileName}
         isOpen={Boolean(cropSource)}

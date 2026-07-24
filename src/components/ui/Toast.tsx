@@ -174,13 +174,15 @@ function ToastItem({
   }, [countdown, toast.id, onRemove]);
 
   useEffect(() => {
-    if (toast.countdown !== undefined || isHovered) return;
+    if (toast.countdown !== undefined) return;
+    if (isInteracting) return;
+
     const timer = setTimeout(() => {
       onRemove(toast.id);
     }, TOAST_DURATION_MS);
 
     return () => clearTimeout(timer);
-  }, [toast.id, onRemove, toast.countdown, isHovered]);
+  }, [toast.id, onRemove, toast.countdown, isInteracting]);
 
   const Icon =
     toast.type === "success"
