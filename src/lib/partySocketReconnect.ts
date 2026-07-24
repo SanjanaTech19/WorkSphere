@@ -93,13 +93,13 @@ type DelaySocket = {
   __offlineActionsQueue?: string[];
   __offlineCrdtQueue?: any[];
 };
-
 /** Swap in jittered backoff on a live PartySocket instance (idempotent). */
 export function attachJitteredBackoff<T extends object>(socket: T): T {
   const s = socket as T & DelaySocket;
   if (s.__worksphereJitter) return socket;
 
-  let pendingTimeoutId: any = null;
+let pendingTimeoutId: any = null;
+  let pendingResolve: (() => void) | null = null;
   s.__worksphereState = ConnectionState.CLOSED;
   s.__lastCloseCode = null;
   s.__lastCloseReason = null;
@@ -110,41 +110,57 @@ export function attachJitteredBackoff<T extends object>(socket: T): T {
     return jitteredReconnectDelay(this._retryCount);
   };
 
-  s._wait = function (this: any) {
+s._wait = function (this: any) {
     if (pendingTimeoutId) {
       clearTimeout(pendingTimeoutId);
     }
     return new Promise<void>((resolve) => {
+      pendingResolve = resolve;
       pendingTimeoutId = setTimeout(() => {
         pendingTimeoutId = null;
+        pendingResolve = null;
         resolve();
       }, this._getNextDelay());
     });
   };
 
-  const originalClearTimeouts = s._clearTimeouts;
+  /** Skip any pending backoff sleep and reconnect right now. */
+  s.__worksphereForceReconnect = function (this: any) {
+    if (pendingTimeoutId) {
+      clearTimeout(pendingTimeoutId);
+      pendingTimeoutId = null;
+    }
+    if (pendingResolve) {
+      const resolve = pendingResolve;
+      pendingResolve = null;
+      resolve();
+    } else if (typeof this._connect === "function") {
+      this._connect();
+    }
+  };
+const originalClearTimeouts = s._clearTimeouts;
   s._clearTimeouts = function (this: any) {
     if (pendingTimeoutId) {
       clearTimeout(pendingTimeoutId);
       pendingTimeoutId = null;
     }
+    pendingResolve = null;
     if (originalClearTimeouts) {
       originalClearTimeouts.call(this);
     }
   };
-
-  const originalDisconnect = s._disconnect;
+const originalDisconnect = s._disconnect;
   s._disconnect = function (this: any, code?: number, reason?: string) {
     s.__worksphereState = ConnectionState.CLOSED;
     if (pendingTimeoutId) {
       clearTimeout(pendingTimeoutId);
       pendingTimeoutId = null;
     }
+    pendingResolve = null;
     if (originalDisconnect) {
       originalDisconnect.call(this, code, reason);
     }
   };
-
   const originalConnect = s._connect;
   if (originalConnect) {
     s._connect = function (this: any) {
@@ -223,6 +239,13 @@ export function attachJitteredBackoff<T extends object>(socket: T): T {
     });
   }
 
+  if (typeof window !== "undefined") {
+    window.addEventListener("online", () => {
+      if (s.__worksphereState !== ConnectionState.CONNECTED) {
+        (s as any).__worksphereForceReconnect?.();
+      }
+    });
+  }
   s.__worksphereJitter = true;
   return socket;
 }
