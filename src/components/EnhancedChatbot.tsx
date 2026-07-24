@@ -52,8 +52,8 @@ interface MapUpdate {
     center?: { lat: number; lng: number };
     zoom?: number;
     animate?: boolean;
-    markers?: any[];
-    routes?: any[];
+    markers?: unknown[];
+    routes?: unknown[];
   };
 }
 
@@ -82,6 +82,7 @@ interface Filters {
   oatAlmondMilk?: boolean;
   pourOverAvailable?: boolean;
   musicStyle?: "all" | "lofi" | "classical_jazz" | "no_music";
+  [key: string]: unknown;
 }
 
 interface Conversation {
@@ -183,12 +184,16 @@ export function EnhancedChatbot({
   >(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
+  // Throttled mouse tracking
   useEffect(() => {
     if (!socket || !roomId) return;
 
+    let lastSend = 0;
     const handleMouseMove = (e: MouseEvent) => {
-      // Throttle mouse moves to avoid flooding
-      if (Math.random() > 0.8) {
+      const now = Date.now();
+      // Throttle mouse updates to 30fps (~33ms)
+      if (now - lastSend > 33) {
+        lastSend = now;
         sendSocketMessage(
           JSON.stringify({
             type: "cursor",
@@ -330,9 +335,6 @@ export function EnhancedChatbot({
       if (res.ok) {
         const data = await res.json();
         const rawConversations: Conversation[] = data.conversations || [];
-        // Apply any not-yet-synced offline renames/deletes on top of the
-        // server (or SW-cached) list, so a reload while offline — or before
-        // background sync has run — doesn't revert local edits. See #266.
         const pendingEdits = await getPendingConversationEdits();
         const merged = applyPendingConversationEdits(
           rawConversations,
@@ -392,8 +394,6 @@ export function EnhancedChatbot({
   };
 
   const deleteConversation = async (id: string) => {
-    // Reflect the change in the sidebar immediately regardless of connectivity,
-    // so the UI never feels unresponsive while offline (see #266).
     setConversations((prev) => prev.filter((c) => c.id !== id));
     if (currentConversationId === id) {
       setCurrentConversationId(null);
@@ -440,10 +440,6 @@ export function EnhancedChatbot({
     }
   };
 
-  // Flush any queued offline conversation edits as soon as connectivity
-  // returns — a foreground fallback alongside the service worker's
-  // Background Sync registration (which some browsers, e.g. Safari, don't
-  // support at all).
   useEffect(() => {
     const handleOnline = () => {
       flushConversationEditQueue().then(() => {
@@ -512,7 +508,6 @@ export function EnhancedChatbot({
     }
   }, []);
 
-  // Load conversations & favorites on sign-in
   useEffect(() => {
     if (isSignedIn) {
       loadConversations();
@@ -685,14 +680,14 @@ export function EnhancedChatbot({
       if (next[key]) {
         delete next[key];
       } else {
-        (next as Record<string, boolean>)[key] = true;
+        next[key] = true;
       }
       trackFilterApplied(next);
       return next;
     });
   };
 
-  const handleSetFilter = (key: string, value: any) => {
+  const handleSetFilter = (key: string, value: unknown) => {
     setFilters((prev) => {
       const next = { ...prev };
       if (
@@ -701,9 +696,9 @@ export function EnhancedChatbot({
         value === "none" ||
         value === "all"
       ) {
-        delete next[key as keyof Filters];
+        delete next[key];
       } else {
-        (next as any)[key] = value;
+        next[key] = value;
       }
       trackFilterApplied(next);
       return next;
@@ -720,7 +715,6 @@ export function EnhancedChatbot({
     (suggestion: string) => {
       if (isLoading) return;
       setInput(suggestion);
-      // Submit on next tick after state settles
       setTimeout(() => {
         const form = document.getElementById(
           "ws-chat-form",
@@ -765,7 +759,6 @@ export function EnhancedChatbot({
     setError(null);
     setIsLoading(true);
 
-    // Create conversation if needed
     let convId = currentConversationId;
     if (!convId && isSignedIn) {
       convId = await createConversation();
@@ -778,7 +771,14 @@ export function EnhancedChatbot({
       name: user?.firstName || "Anonymous",
     };
 
+
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === newUserMessage.id)) return prev;
+      return [...prev, newUserMessage];
+    });
+
     setMessages((prev) => [...prev, newUserMessage]);
+
 
     if (socket && roomId) {
       sendSocketMessage(
@@ -808,12 +808,9 @@ export function EnhancedChatbot({
 
         try {
           const data = await response.json();
-
-          if (data?.error) {
-            errorMessage = data.error;
-          }
+          if (data?.error) errorMessage = data.error;
         } catch {
-          // Ignore JSON parsing errors and use default message
+          // Ignore JSON parsing errors
         }
 
         if (response.status === 429) {
@@ -823,6 +820,20 @@ export function EnhancedChatbot({
 
         throw new Error(errorMessage);
       }
+
+      const assistantMessageId = (Date.now() + 1).toString();
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === assistantMessageId)) return prev;
+        return [
+          ...prev,
+          {
+            id: assistantMessageId,
+            role: "assistant",
+            content: "",
+            isStreaming: true,
+          },
+        ];
+      });
 
       const assistantMessageId = nextMsgId();
       setMessages((prev) => [
@@ -835,12 +846,12 @@ export function EnhancedChatbot({
         },
       ]);
 
-      setIsLoading(false); // Stream starts, disable loading spinner
+
+      setIsLoading(false);
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let metadata: any = null;
 
       if (reader) {
         while (true) {
@@ -855,7 +866,7 @@ export function EnhancedChatbot({
             if (chunk.startsWith("METADATA:")) {
               const metaStr = chunk.slice(9).trim();
               try {
-                metadata = JSON.parse(metaStr);
+                const metadata = JSON.parse(metaStr);
 
                 if (metadata.highTraffic) {
                   onShowToast?.(
@@ -938,55 +949,6 @@ export function EnhancedChatbot({
                 ),
               );
             }
-          }
-        }
-
-        // Process remaining buffer
-        if (buffer) {
-          if (buffer.startsWith("METADATA:")) {
-            const metaStr = buffer.slice(9).trim();
-            try {
-              metadata = JSON.parse(metaStr);
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantMessageId
-                    ? {
-                        ...m,
-                        venues: metadata.venues,
-                        agentSteps: metadata.agentSteps,
-                        suggestions: metadata.suggestions,
-                        cached: metadata.cached,
-                        complexity: metadata.complexity,
-                      }
-                    : m,
-                ),
-              );
-
-              try {
-                await saveSearchOffline(
-                  userMessage,
-                  (metadata.venues ?? []).map((v: Venue) => ({
-                    id: v.id,
-                    name: v.name,
-                    latitude: v.lat,
-                    longitude: v.lng,
-                    category: v.category,
-                    address: v.address,
-                  })),
-                );
-              } catch (err) {
-                console.warn("Failed to cache search:", err);
-              }
-            } catch {}
-          } else if (buffer.startsWith("TEXT:")) {
-            const text = buffer.slice(5);
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === assistantMessageId
-                  ? { ...m, content: m.content + text }
-                  : m,
-              ),
-            );
           }
         }
       }
@@ -1144,9 +1106,7 @@ export function EnhancedChatbot({
         conversations={conversations}
         onLoadConversation={loadConversation}
         onDeleteConversation={deleteConversation}
-
         onRenameConversation={renameConversation}
-
         roomId={roomId || currentConversationId}
         onShareSession={() => {
           let sessionToShare = roomId || currentConversationId;
@@ -1156,9 +1116,8 @@ export function EnhancedChatbot({
               Math.random().toString(36).substring(2, 7);
             const url = new URL(window.location.href);
             url.searchParams.set("session", sessionToShare);
-            // Instead of just copying, we need to be in that session too, so let's navigate to it
             window.location.href = url.toString();
-            return; // the reload will put them in the room
+            return;
           }
           const url = new URL(window.location.href);
           url.searchParams.set("session", sessionToShare);
