@@ -85,8 +85,13 @@ type DelaySocket = {
     event: string,
     callback: (...args: any[]) => void,
   ) => void;
+  send?: (data: any) => void;
   __worksphereJitter?: boolean;
   __worksphereState?: ConnectionState;
+  __lastCloseCode?: number | null;
+  __lastCloseReason?: string | null;
+  __offlineActionsQueue?: string[];
+  __offlineCrdtQueue?: any[];
 };
 
 /** Swap in jittered backoff on a live PartySocket instance (idempotent). */
@@ -96,6 +101,10 @@ export function attachJitteredBackoff<T extends object>(socket: T): T {
 
   let pendingTimeoutId: any = null;
   s.__worksphereState = ConnectionState.CLOSED;
+  s.__lastCloseCode = null;
+  s.__lastCloseReason = null;
+  s.__offlineActionsQueue = [];
+  s.__offlineCrdtQueue = [];
 
   s._getNextDelay = function (this: DelaySocket) {
     return jitteredReconnectDelay(this._retryCount);
@@ -154,13 +163,59 @@ export function attachJitteredBackoff<T extends object>(socket: T): T {
     };
   }
 
+  const originalSend = s.send;
+  if (originalSend) {
+    s.send = function (this: any, data: any) {
+      if (s.__worksphereState === ConnectionState.CONNECTED) {
+        originalSend.call(this, data);
+      } else {
+        if (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) {
+          if (!s.__offlineCrdtQueue) s.__offlineCrdtQueue = [];
+          s.__offlineCrdtQueue.push(data);
+        } else if (typeof data === "string") {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === "cursor" || parsed.type === "presence") {
+              return;
+            }
+          } catch {
+            // Not valid JSON, keep it in queue
+          }
+          if (!s.__offlineActionsQueue) s.__offlineActionsQueue = [];
+          s.__offlineActionsQueue.push(data);
+        } else {
+          if (!s.__offlineActionsQueue) s.__offlineActionsQueue = [];
+          s.__offlineActionsQueue.push(data);
+        }
+      }
+    };
+  }
+
   if (typeof s.addEventListener === "function") {
     s.addEventListener("open", () => {
       s.__worksphereState = ConnectionState.CONNECTED;
+      if (originalSend) {
+        if (s.__offlineCrdtQueue && s.__offlineCrdtQueue.length > 0) {
+          const crdtQueue = [...s.__offlineCrdtQueue];
+          s.__offlineCrdtQueue = [];
+          crdtQueue.forEach((msg) => {
+            originalSend.call(s, msg);
+          });
+        }
+        if (s.__offlineActionsQueue && s.__offlineActionsQueue.length > 0) {
+          const actionsQueue = [...s.__offlineActionsQueue];
+          s.__offlineActionsQueue = [];
+          actionsQueue.forEach((msg) => {
+            originalSend.call(s, msg);
+          });
+        }
+      }
     });
 
-    s.addEventListener("close", () => {
+    s.addEventListener("close", (event?: any) => {
       s.__worksphereState = ConnectionState.CLOSED;
+      s.__lastCloseCode = event?.code ?? null;
+      s.__lastCloseReason = event?.reason ?? null;
     });
 
     s.addEventListener("error", () => {
@@ -181,6 +236,8 @@ export class PartySocketReconnectManager {
   private retryCount = 0;
   private config: PartyReconnectOptions & RegionProbeConfig;
   public currentRegion: string | null = null;
+  public lastCloseCode: number | null = null;
+  public lastCloseReason: string | null = null;
 
   constructor(config: Partial<PartyReconnectOptions> & RegionProbeConfig) {
     this.config = {
@@ -230,8 +287,15 @@ export class PartySocketReconnectManager {
     return healthy[0].region;
   }
 
-  async onDisconnect(): Promise<string | null> {
+  async onDisconnect(code?: number, reason?: string): Promise<string | null> {
     this.retryCount++;
+    this.lastCloseCode = code ?? null;
+    this.lastCloseReason = reason ?? null;
+
+    if (code === 1008 || code === 1000) {
+      return null;
+    }
+
     if (this.retryCount > this.config.maxRetries) {
       return null;
     }
