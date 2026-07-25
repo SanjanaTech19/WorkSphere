@@ -6,7 +6,8 @@ import {
   buildEmergencyKitPayload,
   generateRecoveryQRCodeSVG,
   generateEmergencyKitPDF,
-} from "@/lib/passkey/recovery";import crypto from "crypto";
+} from "@/lib/passkey/recovery";
+import crypto from "crypto";
 // Polyfill for crypto in Jest if necessary, though modern Node has it
 if (!globalThis.crypto) {
   Object.defineProperty(globalThis, "crypto", {
@@ -58,7 +59,7 @@ describe("Shamir's Secret Sharing (2-of-3)", () => {
     expect(encrypted.iv).toBeDefined();
     expect(encrypted.ciphertext).toBeDefined();
 
-const decrypted = await decryptShare(encrypted, key);
+    const decrypted = await decryptShare(encrypted, key);
     expect(decrypted.x).toBe(1);
     expect(decrypted.y).toEqual(share.y);
   });
@@ -83,7 +84,7 @@ describe("Emergency kit QR export (#1556)", () => {
 
     // The payload must never contain raw plaintext share bytes.
     const serialized = JSON.stringify(payload);
-    expect(serialized).not.toContain("y");
+    expect(serialized).not.toContain('"y":');
     expect(serialized).toContain(encrypted.ciphertext);
   });
 
@@ -117,7 +118,7 @@ describe("Emergency kit QR export (#1556)", () => {
     const payloadA = buildEmergencyKitPayload(await encryptShare(shareA, key));
     const payloadB = buildEmergencyKitPayload(await encryptShare(shareB, key));
 
-const svgA = generateRecoveryQRCodeSVG(payloadA);
+    const svgA = generateRecoveryQRCodeSVG(payloadA);
     const svgB = generateRecoveryQRCodeSVG(payloadB);
 
     expect(svgA).not.toBe(svgB);
