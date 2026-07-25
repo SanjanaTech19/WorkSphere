@@ -79,7 +79,6 @@ export async function withLeaderLock<T>(
   }
   return { acquired: false, result: await callback() };
 }
-
 export interface OfflineVenue {
   id: string;
   name: string;
